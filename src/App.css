@@ -265,6 +265,14 @@ ul {
   line-height: 1.8;
 }
 
+.hero-passport-text {
+  font-size: 0.85rem;
+  color: var(--solana-green);
+  opacity: 0.85;
+  max-width: 480px;
+  line-height: 1.6;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

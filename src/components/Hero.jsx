@@ -12,6 +12,9 @@ export default function Hero() {
           pueblos originarios hasta el presente, descubre las eras que definieron
           a Venezuela.
         </p>
+        <p className="hero-passport-text">
+          Conecta tu wallet de Solana, aprueba cuestionarios y reclama sellos históricos en la blockchain para desbloquear todas las eras.
+        </p>
         <a
           href="#era-prehispanico"
           className="btn btn-primary"
