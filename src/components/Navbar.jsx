@@ -1,8 +1,11 @@
 import { useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
-export default function Navbar() {
+export default function Navbar({ onOpenPassport }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { publicKey } = useWallet();
   const location = useLocation();
 
   const toggleNav = useCallback(() => {
@@ -27,7 +30,17 @@ export default function Navbar() {
     [closeNav]
   );
 
+  const handleOpenPassport = useCallback(() => {
+    closeNav();
+    if (onOpenPassport) onOpenPassport();
+  }, [closeNav, onOpenPassport]);
+
   const isHome = location.pathname === '/';
+
+  const walletDisplay = publicKey
+    ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
+    : null;
+  void walletDisplay;
 
   return (
     <header className="navbar" role="banner">
@@ -97,14 +110,14 @@ export default function Navbar() {
               </li>
             </>
           ) : null}
-          <li>
-            <Link
-              to="/documentacion"
-              aria-label="Ir a la documentación del proyecto"
-              onClick={closeNav}
-            >
-              Documentación
-            </Link>
+          <li className="nav-item-passport">
+            <button className="nav-link-passport" onClick={handleOpenPassport}>
+              Mi Pasaporte
+            </button>
+          </li>
+
+          <li className="nav-wallet-item">
+            <WalletMultiButton className="wallet-btn-custom" />
           </li>
         </ul>
       </nav>

@@ -348,9 +348,12 @@ const sigloXixXxQuiz = [
   }
 ];
 
+import contemporaneaQuiz from './contemporaneaQuiz.js';
+
 export const quizRegistry = {
   prehispanico: { data: prehispanicoQuiz, key: 'quizPrehispanico', title: 'Era Prehispánica' },
   colonial: { data: colonialQuiz, key: 'quizColonial', title: 'Era Colonial' },
   independencia: { data: independenciaQuiz, key: 'quizIndependencia', title: 'Independencia' },
-  'siglo-xix-xx': { data: sigloXixXxQuiz, key: 'quizSigloXixXx', title: 'Siglos XIX y XX' }
+  'siglo-xix-xx': { data: sigloXixXxQuiz, key: 'quizSigloXixXx', title: 'Siglos XIX y XX' },
+  contemporanea: { data: contemporaneaQuiz, key: 'quizContemporanea', title: 'Contemporánea' }
 };

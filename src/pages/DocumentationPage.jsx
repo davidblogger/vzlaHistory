@@ -60,6 +60,24 @@ export default function DocumentationPage() {
                 </p>
               </div>
               <div className="doc-card">
+                <p className="doc-card-question">Pasaporte Histórico</p>
+                <p className="doc-card-answer">
+                  Es un registro de tu progreso educativo asociado a tu wallet de Solana. Conecta tu wallet con el botón en el navbar, completa los cuestionarios y reclama sellos históricos en la blockchain para desbloquear nuevas eras. Puedes ver tu progreso desde <strong>Mi Pasaporte</strong> en el navbar.
+                </p>
+              </div>
+              <div className="doc-card">
+                <p className="doc-card-question">¿Cómo funcionan los sellos?</p>
+                <p className="doc-card-answer">
+                  Cada era histórica tiene un cuestionario. Si obtienes <strong>70% o más</strong>, puedes reclamar un <strong>Sello Histórico</strong> en Solana Devnet. Al reclamarlo se envía una transacción simbólica de 0.000001 SOL a la treasury del proyecto, registrando tu logro en la blockchain. El sello no se otorga automáticamente: debes presionar el botón <strong>"Reclamar Sello Histórico"</strong> y firmar la transacción con tu wallet.
+                </p>
+              </div>
+              <div className="doc-card">
+                <p className="doc-card-question">Desbloqueo progresivo</p>
+                <p className="doc-card-answer">
+                  Las eras se desbloquean de forma secuencial. Solo la <strong>Era Prehispánica</strong> está disponible al inicio. Para desbloquear la siguiente era debes: aprobar el cuestionario con 70%+ <strong>y</strong> reclamar el sello en Solana. Sin el sello reclamado en la blockchain, la siguiente era permanece bloqueada.
+                </p>
+              </div>
+              <div className="doc-card">
                 <p className="doc-card-question">Equipo / roles</p>
                 <p className="doc-card-answer">
                   <strong>David Mijares</strong> — Desarrollador

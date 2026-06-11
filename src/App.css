@@ -561,6 +561,23 @@ ul {
   font-size: 0.8rem;
 }
 
+.footer-nav {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.footer-link {
+  color: var(--solana-purple);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color var(--transition);
+}
+
+.footer-link:hover {
+  color: var(--solana-green);
+}
+
 /* ──────────────────────────────────────────────────────── */
 /* 9. Responsive – Mobile                                   */
 /* ──────────────────────────────────────────────────────── */
@@ -1157,4 +1174,435 @@ ul {
   color: var(--text-secondary);
   font-size: 1.05rem;
   margin-bottom: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 15. Wallet Navbar                                          */
+/* ═══════════════════════════════════════════════════════════ */
+
+.nav-wallet-item {
+  display: flex;
+  align-items: center;
+  max-width: 200px;
+  margin-left: 8px;
+}
+
+.wallet-btn-custom {
+  height: 32px !important;
+  min-height: unset !important;
+  font-size: 0.75rem !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0 12px !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+  line-height: 32px !important;
+  overflow-wrap: break-word !important;
+}
+
+.wallet-adapter-button {
+  background: linear-gradient(135deg, var(--solana-purple), #7C3AED) !important;
+  color: #fff !important;
+  font-family: var(--font-main) !important;
+  border-radius: var(--radius-sm) !important;
+  transition: box-shadow var(--transition), transform var(--transition) !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+.wallet-adapter-button:hover {
+  box-shadow: 0 0 24px rgba(153, 69, 255, 0.4) !important;
+  transform: translateY(-1px);
+}
+
+.wallet-adapter-button:not(.wallet-adapter-button-trigger) {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.wallet-adapter-button-start-icon {
+  margin-right: 6px !important;
+}
+
+.wallet-adapter-button-trigger .wallet-adapter-button-start-icon {
+  display: none !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: var(--bg-card) !important;
+  font-family: var(--font-main) !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background: var(--bg-secondary) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: var(--text-primary) !important;
+}
+
+.nav-item-passport {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link-passport {
+  background: none;
+  border: 1px solid var(--solana-green);
+  color: var(--solana-green);
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition);
+  white-space: nowrap;
+}
+
+.nav-link-passport:hover {
+  background: var(--green-dim);
+  box-shadow: var(--green-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 16. Timeline Era Status Icons                              */
+/* ═══════════════════════════════════════════════════════════ */
+
+.timeline-era-status-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.timeline-quiz-locked {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 17. Passport Dashboard Modal                               */
+/* ═══════════════════════════════════════════════════════════ */
+
+.passport-content {
+  max-width: 520px;
+}
+
+.passport-body {
+  padding: 24px;
+}
+
+.passport-no-wallet {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+}
+
+.passport-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.passport-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.passport-field-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.passport-field-value {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: var(--font-mono, monospace);
+}
+
+.passport-sig {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.passport-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.passport-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--solana-purple), var(--solana-green));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.passport-era-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.passport-era-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--transition);
+}
+
+.passport-era-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.passport-era-name {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.passport-era-status {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.era-stamped {
+  border-color: var(--solana-green);
+}
+
+.era-stamped .passport-era-status {
+  color: var(--solana-green);
+}
+
+.era-completed {
+  border-color: #FF9800;
+}
+
+.era-completed .passport-era-status {
+  color: #FF9800;
+}
+
+.era-unlocked {
+  border-color: var(--border-color);
+}
+
+.era-unlocked .passport-era-status {
+  color: var(--solana-purple);
+}
+
+.era-locked {
+  opacity: 0.6;
+}
+
+.era-locked .passport-era-status {
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 18. Claim Screen                                           */
+/* ═══════════════════════════════════════════════════════════ */
+
+.claim-screen {
+  text-align: center;
+  padding: 16px 0;
+}
+
+.claim-prompt,
+.claim-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.claim-success-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.claim-prompt-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--solana-purple), var(--solana-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.claim-prompt-text {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.claim-btn {
+  min-width: 240px;
+  justify-content: center;
+}
+
+.claim-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.claim-success-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--solana-green);
+}
+
+.claim-success-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 400px;
+  text-align: left;
+}
+
+.claim-detail {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.claim-detail-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.claim-detail-value {
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: var(--font-mono, monospace);
+  word-break: break-all;
+  text-align: right;
+}
+
+.claim-wallet,
+.claim-signature {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.explorer-link {
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+}
+
+.claim-close-btn {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 10px 24px;
+  font-size: 0.9rem;
+}
+
+.claim-close-btn:hover {
+  border-color: var(--solana-purple);
+  color: var(--text-primary);
+}
+
+.claim-error {
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid #FF4D4D;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.claim-error-msg {
+  color: #FF6B6B;
+  font-size: 0.9rem;
+}
+
+/* ── Quiz passed ── */
+
+.percentage-passed {
+  color: var(--solana-green) !important;
+}
+
+.quiz-passed-msg {
+  color: var(--solana-green);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* 19. Responsive — Wallet & Passport                         */
+/* ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .nav-wallet-item {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+    max-width: none;
+  }
+
+  .wallet-btn-custom {
+    width: 100% !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.75rem !important;
+    height: 32px !important;
+    min-height: unset !important;
+    line-height: 32px !important;
+    padding: 0 12px !important;
+  }
+
+  .nav-item-passport {
+    width: 100%;
+  }
+
+  .nav-link-passport {
+    width: 100%;
+    text-align: center;
+  }
+
+  .passport-content {
+    max-width: 100%;
+    margin: 0 8px;
+  }
+
+  .passport-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .claim-detail {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .claim-detail-value {
+    text-align: left;
+  }
 }

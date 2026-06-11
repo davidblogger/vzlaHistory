@@ -1,4 +1,7 @@
-export default function QuizResults({ data, answers, onRetry }) {
+import { useEffect } from 'react';
+import { PASSING_SCORE } from '../config';
+
+export default function QuizResults({ data, answers, onRetry, onPassQuiz, eraId }) {
   let correctCount = 0;
 
   const resultsHtml = data.map((q, i) => {
@@ -35,6 +38,13 @@ export default function QuizResults({ data, answers, onRetry }) {
   });
 
   const percentage = Math.round((correctCount / data.length) * 100);
+  const passed = percentage >= PASSING_SCORE;
+
+  useEffect(() => {
+    if (passed && onPassQuiz && eraId) {
+      onPassQuiz(eraId);
+    }
+  }, [passed, onPassQuiz, eraId]);
 
   return (
     <div className="quiz-results">
@@ -42,7 +52,10 @@ export default function QuizResults({ data, answers, onRetry }) {
         <span className="quiz-score-num">{correctCount}</span>
         <span className="quiz-score-den">/{data.length}</span>
       </div>
-      <div className="quiz-percentage">{percentage}%</div>
+      <div className={`quiz-percentage ${passed ? 'percentage-passed' : ''}`}>
+        {percentage}% {passed ? '\u2705' : ''}
+      </div>
+      {passed && <p className="quiz-passed-msg">Felicitaciones, has aprobado el cuestionario.</p>}
       <h3 className="quiz-results-title">Resultados</h3>
       <div className="quiz-results-list">{resultsHtml}</div>
       <button className="btn btn-primary quiz-retry-btn" onClick={onRetry}>

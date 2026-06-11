@@ -1,7 +1,7 @@
 import { useRevealAnimations } from '../hooks/useRevealAnimations';
 import TimelineItem from './TimelineItem';
 
-export default function Timeline({ data, onStartQuiz }) {
+export default function Timeline({ data, onStartQuiz, passport }) {
   useRevealAnimations();
 
   return (
@@ -13,7 +13,13 @@ export default function Timeline({ data, onStartQuiz }) {
         </p>
         <div className="timeline" role="list" id="timeline-container">
           {data.map((era) => (
-            <TimelineItem key={era.id} era={era} onStartQuiz={onStartQuiz} />
+            <TimelineItem
+              key={era.id}
+              era={era}
+              onStartQuiz={onStartQuiz}
+              isUnlocked={passport ? passport.isEraUnlocked(era.id) : true}
+              eraStatus={passport ? passport.getEraStatus(era.id) : 'unlocked'}
+            />
           ))}
         </div>
       </div>

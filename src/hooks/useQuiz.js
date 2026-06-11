@@ -10,7 +10,9 @@ function loadState(key, dataLength) {
         return state;
       }
     }
-  } catch (e) {}
+  } catch {
+    // Ignored
+  }
   return null;
 }
 
@@ -81,6 +83,7 @@ export function useQuiz() {
 
   return {
     isOpen,
+    quizId,
     title,
     data,
     state,

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { quizRegistry } from '../data/historyData';
 
-export default function TimelineItem({ era, onStartQuiz }) {
+export default function TimelineItem({ era, onStartQuiz, isUnlocked, eraStatus }) {
   const [expanded, setExpanded] = useState(false);
 
   const toggle = useCallback(() => {
@@ -9,12 +9,20 @@ export default function TimelineItem({ era, onStartQuiz }) {
   }, []);
 
   const hasQuiz = quizRegistry[era.id] != null;
+  const canTakeQuiz = hasQuiz && isUnlocked;
   const quizLabel = {
     prehispanico: 'Pon a prueba tus conocimientos sobre la era Prehispánica.',
     colonia: 'Pon a prueba tus conocimientos sobre la era Colonial.',
     independencia: 'Pon a prueba tus conocimientos sobre la era Independencia.',
     'siglo-xix-xx': 'Pon a prueba tus conocimientos sobre los Siglos XIX y XX.',
+    contemporanea: 'Pon a prueba tus conocimientos sobre la era Contemporánea.',
   };
+
+  const statusIcon =
+    eraStatus === 'stamped' ? '\u2705' :
+    eraStatus === 'completed' ? '\uD83D\uDFE1' :
+    eraStatus === 'unlocked' ? '\uD83D\uDD13' :
+    '\uD83D\uDD12';
 
   return (
     <div
@@ -39,6 +47,7 @@ export default function TimelineItem({ era, onStartQuiz }) {
             <h3>{era.title}</h3>
             <time>{era.period}</time>
           </span>
+          <span className="timeline-era-status-icon">{statusIcon}</span>
           <span className="timeline-icon" aria-hidden="true">
             +
           </span>
@@ -59,7 +68,7 @@ export default function TimelineItem({ era, onStartQuiz }) {
                 </li>
               ))}
             </ul>
-            {hasQuiz && (
+            {canTakeQuiz && (
               <div className="timeline-quiz-section">
                 <div className="timeline-quiz-divider"></div>
                 <p className="timeline-quiz-cta">{quizLabel[era.id]}</p>
@@ -70,6 +79,12 @@ export default function TimelineItem({ era, onStartQuiz }) {
                 >
                   Comenzar Cuestionario
                 </button>
+              </div>
+            )}
+            {!isUnlocked && hasQuiz && (
+              <div className="timeline-quiz-section">
+                <div className="timeline-quiz-divider"></div>
+                <p className="timeline-quiz-locked">Completa la era anterior y reclama tu sello para desbloquear esta era.</p>
               </div>
             )}
           </div>
