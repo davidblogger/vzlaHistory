@@ -303,6 +303,25 @@ ul {
   transform: translateY(-1px);
 }
 
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--solana-purple);
+  border: 2px solid var(--solana-purple);
+}
+
+.btn-secondary:hover {
+  background: var(--purple-dim);
+  box-shadow: var(--purple-glow);
+  transform: translateY(-1px);
+}
+
 .hero-scroll {
   position: absolute;
   bottom: 40px;
