@@ -64,7 +64,7 @@ export default function HomePage() {
       const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
       const treasuryPubkey = new PublicKey(PROJECT_TREASURY_WALLET);
 
-      const { blockhash } = await connection.getLatestBlockhash();
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
       const transaction = new Transaction();
       transaction.feePayer = wallet.publicKey;
@@ -89,19 +89,23 @@ export default function HomePage() {
         return;
       }
 
-      const signedTx = await wallet.signTransaction(transaction);
-      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+      const signature = await wallet.sendTransaction(transaction, connection, {
         skipPreflight: true,
         preflightCommitment: 'confirmed',
+        maxRetries: 5,
       });
 
       setClaimState('confirming');
 
-      const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+      const confirmation = await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight,
+      });
 
       if (confirmation.value.err) {
         setClaimState('error');
-        setClaimError('No se pudo confirmar la transacción en Devnet.');
+        setClaimError('La transacción fue rechazada por la red Devnet.');
         return;
       }
 
@@ -112,23 +116,35 @@ export default function HomePage() {
       setClaimSignature(signature);
       setClaimState('confirmed');
     } catch (err) {
-      if (err.code === 4001 || err.message?.includes('User rejected') || err.message?.includes('cancelada') || err.message?.includes('rechaz')) {
-        setClaimState('error');
-        setClaimError('Firma cancelada por el usuario.');
-      } else if (err.message?.includes('Network') || err.message?.includes('fetch') || err.message?.includes('timeout') || err.message?.includes('Failed to fetch')) {
-        setClaimState('error');
-        setClaimError('Error de conexión con Solana Devnet.');
-      } else if (err.message?.includes('simul') || err.message?.includes('simulation') || err.message?.includes('simulate')) {
-        setClaimState('error');
-        setClaimError(
-          'La transacción no pudo simularse en Solflare. ' +
-          'Asegúrate de que tu wallet tenga fondos en Devnet ' +
-          '(usa https://faucet.solana.com para obtener SOL de prueba).'
-        );
-      } else {
-        setClaimState('error');
-        setClaimError(err?.message || 'No se pudo confirmar la transacción en Devnet.');
+      if (typeof err === 'object' && err !== null) {
+        const msg = err.message || err.toString?.() || '';
+        if (err.code === 4001 || msg.includes('User rejected') || msg.includes('cancelada') || msg.includes('rechaz')) {
+          setClaimState('error');
+          setClaimError('Firma cancelada por el usuario.');
+          return;
+        }
+        if (msg.includes('Network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('Failed to fetch')) {
+          setClaimState('error');
+          setClaimError('Error de conexión con Solana Devnet. Intenta de nuevo.');
+          return;
+        }
+        if (msg.includes('simul') || msg.includes('simulation') || msg.includes('simulate')) {
+          setClaimState('error');
+          setClaimError(
+            'La transacción no pudo simularse en Solflare. ' +
+            'Asegúrate de que tu wallet tenga fondos en Devnet ' +
+            '(usa https://faucet.solana.com para obtener SOL de prueba).'
+          );
+          return;
+        }
+        if (msg.includes('blockhash') || msg.includes('expired')) {
+          setClaimState('error');
+          setClaimError('El bloque expiró. Vuelve a intentar reclamar el sello.');
+          return;
+        }
       }
+      setClaimState('error');
+      setClaimError('No se pudo completar la transacción en Devnet. Reintenta.');
     }
   }, [wallet, quiz.quizId, passport]);
 
