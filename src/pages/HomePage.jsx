@@ -64,7 +64,12 @@ export default function HomePage() {
       const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
       const treasuryPubkey = new PublicKey(PROJECT_TREASURY_WALLET);
 
-      const transaction = new Transaction().add(
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const transaction = new Transaction({
+        feePayer: wallet.publicKey,
+        recentBlockhash: blockhash,
+      }).add(
         SystemProgram.transfer({
           fromPubkey: wallet.publicKey,
           toPubkey: treasuryPubkey,
@@ -72,7 +77,7 @@ export default function HomePage() {
         })
       );
 
-      const signature = await wallet.sendTransaction(transaction, connection);
+      const signature = await wallet.sendTransaction(transaction, connection, { skipPreflight: true });
 
       setClaimState('confirming');
 
@@ -91,15 +96,18 @@ export default function HomePage() {
       setClaimSignature(signature);
       setClaimState('confirmed');
     } catch (err) {
-      if (err.code === 4001 || err.message?.includes('User rejected') || err.message?.includes('cancelada')) {
+      if (err.code === 4001 || err.message?.includes('User rejected') || err.message?.includes('cancelada') || err.message?.includes('rechaz')) {
         setClaimState('error');
         setClaimError('Firma cancelada por el usuario.');
       } else if (err.message?.includes('Network') || err.message?.includes('fetch') || err.message?.includes('timeout') || err.message?.includes('Failed to fetch')) {
         setClaimState('error');
         setClaimError('Error de conexión con Solana Devnet.');
+      } else if (err.message?.includes('simul') || err.message?.includes('simulation') || err.message?.includes('simulate')) {
+        setClaimState('error');
+        setClaimError('La transacción no pudo simularse. Verifica que tu wallet tenga fondos en Devnet (usa el grifo de Solana para obtener SOL de prueba).');
       } else {
         setClaimState('error');
-        setClaimError('No se pudo confirmar la transacción en Devnet.');
+        setClaimError(err?.message || 'No se pudo confirmar la transacción en Devnet.');
       }
     }
   }, [wallet, quiz.quizId, passport]);
