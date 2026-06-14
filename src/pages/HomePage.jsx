@@ -77,7 +77,12 @@ export default function HomePage() {
 
       const memo = `HistoriaVE:sello:${eraId}:${wallet.publicKey.toBase58()}:${Date.now()}`;
 
-      const transaction = new Transaction().add({
+      const { blockhash } = await connection.getLatestBlockhash();
+
+      const transaction = new Transaction();
+      transaction.feePayer = wallet.publicKey;
+      transaction.recentBlockhash = blockhash;
+      transaction.add({
         keys: [{ pubkey: wallet.publicKey, isSigner: true, isWritable: true }],
         programId: MEMO_PROGRAM_ID,
         data: new TextEncoder().encode(memo),
@@ -123,12 +128,12 @@ export default function HomePage() {
       } else if (msg.includes('blockhash') || msg.includes('expired')) {
         setClaimState('error');
         setClaimError('El bloque expiró. Vuelve a intentar reclamar el sello.');
+      } else if (msg.includes('Provided keys do not match')) {
+        setClaimState('error');
+        setClaimError('Error de configuración de la transacción. Recarga la página e intenta de nuevo.');
       } else {
         setClaimState('error');
-        setClaimError(
-          'No se pudo completar la transacción en Devnet. ' +
-          'Verifica tu conexión e intenta de nuevo.'
-        );
+        setClaimError(msg || 'No se pudo completar la transacción en Devnet. Reintenta.');
       }
     }
   }, [wallet, quiz.quizId, passport]);
