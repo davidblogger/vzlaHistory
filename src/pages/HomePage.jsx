@@ -1,14 +1,15 @@
 import { useCallback, useState, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection, Transaction, SystemProgram, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { Connection, Transaction, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { historyData } from '../data/historyData';
 import { useScrollSpy } from '../hooks/useScrollSpy';
 import { useQuiz } from '../hooks/useQuiz';
 import { usePassportContext } from '../context/PassportContext';
-import { PROJECT_TREASURY_WALLET, CLAIM_AMOUNT_LAMPORTS } from '../config';
 import Hero from '../components/Hero';
 import Timeline from '../components/Timeline';
 import QuizModal from '../components/QuizModal';
+
+const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
 export default function HomePage() {
   const quiz = useQuiz();
@@ -61,42 +62,28 @@ export default function HomePage() {
     setClaimError(null);
 
     const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-    const treasuryPubkey = new PublicKey(PROJECT_TREASURY_WALLET);
 
     try {
       const balance = await connection.getBalance(wallet.publicKey);
-      if (balance < CLAIM_AMOUNT_LAMPORTS + 5000) {
+      if (balance < 5000) {
         setClaimState('error');
         setClaimError(
-          'Tu wallet no tiene suficientes fondos en Devnet. ' +
-          'Necesitas al menos ~0.000006 SOL. ' +
-          'Usa un grifo de Solana Devnet (ej. https://faucet.solana.com) ' +
-          'para obtener SOL de prueba.'
+          'Tu wallet no tiene suficientes fondos en Devnet para pagar la cuota de red. ' +
+          'Necesitas al menos ~0.000005 SOL. ' +
+          'Usa un grifo de Solana Devnet (ej. https://faucet.solana.com).'
         );
         return;
       }
 
-      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+      const memo = `HistoriaVE:sello:${eraId}:${wallet.publicKey.toBase58()}:${Date.now()}`;
 
-      const transaction = new Transaction();
-      transaction.feePayer = wallet.publicKey;
-      transaction.recentBlockhash = blockhash;
-      transaction.add(
-        SystemProgram.transfer({
-          fromPubkey: wallet.publicKey,
-          toPubkey: treasuryPubkey,
-          lamports: CLAIM_AMOUNT_LAMPORTS,
-        })
-      );
+      const transaction = new Transaction().add({
+        keys: [{ pubkey: wallet.publicKey, isSigner: true, isWritable: true }],
+        programId: MEMO_PROGRAM_ID,
+        data: new TextEncoder().encode(memo),
+      });
 
       const signedTx = await wallet.signTransaction(transaction);
-
-      const currentBlockHeight = await connection.getBlockHeight('confirmed');
-      if (currentBlockHeight > lastValidBlockHeight) {
-        setClaimState('error');
-        setClaimError('El bloque expiró mientras firmabas. Vuelve a intentar.');
-        return;
-      }
 
       const signature = await connection.sendRawTransaction(
         signedTx.serialize(),
@@ -105,11 +92,10 @@ export default function HomePage() {
 
       setClaimState('confirming');
 
-      const confirmation = await connection.confirmTransaction({
+      const confirmation = await connection.confirmTransaction(
         signature,
-        blockhash,
-        lastValidBlockHeight,
-      });
+        'confirmed'
+      );
 
       if (confirmation.value.err) {
         setClaimState('error');
@@ -127,32 +113,22 @@ export default function HomePage() {
       const msg = typeof err === 'object' && err !== null
         ? (err.message || err.toString?.() || '')
         : String(err);
+
       if (err?.code === 4001 || msg.includes('User rejected') || msg.includes('cancelada') || msg.includes('rechaz')) {
         setClaimState('error');
         setClaimError('Firma cancelada por el usuario.');
-      } else if (msg.includes('seguridad') || msg.includes('security') || msg.includes('verificar')) {
-        setClaimState('error');
-        setClaimError(
-          'Solflare no pudo verificar la transacción. ' +
-          'Asegúrate de tener conexión a Internet e intenta de nuevo. ' +
-          'Si el problema persiste, usa una wallet diferente como Phantom.'
-        );
       } else if (msg.includes('Network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('Failed to fetch')) {
         setClaimState('error');
         setClaimError('Error de conexión con Solana Devnet. Intenta de nuevo.');
       } else if (msg.includes('blockhash') || msg.includes('expired')) {
         setClaimState('error');
         setClaimError('El bloque expiró. Vuelve a intentar reclamar el sello.');
-      } else if (msg.includes('simul') || msg.includes('simulation') || msg.includes('simulate')) {
-        setClaimState('error');
-        setClaimError(
-          'La transacción no pudo simularse. ' +
-          'Asegúrate de que tu wallet tenga fondos en Devnet ' +
-          '(usa https://faucet.solana.com para obtener SOL de prueba).'
-        );
       } else {
         setClaimState('error');
-        setClaimError(msg || 'No se pudo completar la transacción en Devnet. Reintenta.');
+        setClaimError(
+          'No se pudo completar la transacción en Devnet. ' +
+          'Verifica tu conexión e intenta de nuevo.'
+        );
       }
     }
   }, [wallet, quiz.quizId, passport]);
