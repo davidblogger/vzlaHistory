@@ -66,10 +66,10 @@ export default function HomePage() {
 
       const { blockhash } = await connection.getLatestBlockhash();
 
-      const transaction = new Transaction({
-        feePayer: wallet.publicKey,
-        recentBlockhash: blockhash,
-      }).add(
+      const transaction = new Transaction();
+      transaction.feePayer = wallet.publicKey;
+      transaction.recentBlockhash = blockhash;
+      transaction.add(
         SystemProgram.transfer({
           fromPubkey: wallet.publicKey,
           toPubkey: treasuryPubkey,
@@ -77,7 +77,23 @@ export default function HomePage() {
         })
       );
 
-      const signature = await wallet.sendTransaction(transaction, connection, { skipPreflight: true });
+      const balance = await connection.getBalance(wallet.publicKey);
+      if (balance < CLAIM_AMOUNT_LAMPORTS + 5000) {
+        setClaimState('error');
+        setClaimError(
+          'Tu wallet no tiene suficientes fondos en Devnet. ' +
+          'Necesitas al menos ~0.000006 SOL. ' +
+          'Usa un grifo de Solana Devnet (ej. https://faucet.solana.com) ' +
+          'para obtener SOL de prueba.'
+        );
+        return;
+      }
+
+      const signedTx = await wallet.signTransaction(transaction);
+      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+        skipPreflight: true,
+        preflightCommitment: 'confirmed',
+      });
 
       setClaimState('confirming');
 
@@ -104,7 +120,11 @@ export default function HomePage() {
         setClaimError('Error de conexión con Solana Devnet.');
       } else if (err.message?.includes('simul') || err.message?.includes('simulation') || err.message?.includes('simulate')) {
         setClaimState('error');
-        setClaimError('La transacción no pudo simularse. Verifica que tu wallet tenga fondos en Devnet (usa el grifo de Solana para obtener SOL de prueba).');
+        setClaimError(
+          'La transacción no pudo simularse en Solflare. ' +
+          'Asegúrate de que tu wallet tenga fondos en Devnet ' +
+          '(usa https://faucet.solana.com para obtener SOL de prueba).'
+        );
       } else {
         setClaimState('error');
         setClaimError(err?.message || 'No se pudo confirmar la transacción en Devnet.');
