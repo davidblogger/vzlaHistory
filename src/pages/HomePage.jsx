@@ -60,9 +60,21 @@ export default function HomePage() {
     setClaimState('signing');
     setClaimError(null);
 
+    const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+    const treasuryPubkey = new PublicKey(PROJECT_TREASURY_WALLET);
+
     try {
-      const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
-      const treasuryPubkey = new PublicKey(PROJECT_TREASURY_WALLET);
+      const balance = await connection.getBalance(wallet.publicKey);
+      if (balance < CLAIM_AMOUNT_LAMPORTS + 5000) {
+        setClaimState('error');
+        setClaimError(
+          'Tu wallet no tiene suficientes fondos en Devnet. ' +
+          'Necesitas al menos ~0.000006 SOL. ' +
+          'Usa un grifo de Solana Devnet (ej. https://faucet.solana.com) ' +
+          'para obtener SOL de prueba.'
+        );
+        return;
+      }
 
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
 
@@ -77,23 +89,19 @@ export default function HomePage() {
         })
       );
 
-      const balance = await connection.getBalance(wallet.publicKey);
-      if (balance < CLAIM_AMOUNT_LAMPORTS + 5000) {
+      const signedTx = await wallet.signTransaction(transaction);
+
+      const currentBlockHeight = await connection.getBlockHeight('confirmed');
+      if (currentBlockHeight > lastValidBlockHeight) {
         setClaimState('error');
-        setClaimError(
-          'Tu wallet no tiene suficientes fondos en Devnet. ' +
-          'Necesitas al menos ~0.000006 SOL. ' +
-          'Usa un grifo de Solana Devnet (ej. https://faucet.solana.com) ' +
-          'para obtener SOL de prueba.'
-        );
+        setClaimError('El bloque expiró mientras firmabas. Vuelve a intentar.');
         return;
       }
 
-      const signature = await wallet.sendTransaction(transaction, connection, {
-        skipPreflight: true,
-        preflightCommitment: 'confirmed',
-        maxRetries: 5,
-      });
+      const signature = await connection.sendRawTransaction(
+        signedTx.serialize(),
+        { skipPreflight: true }
+      );
 
       setClaimState('confirming');
 
@@ -116,35 +124,36 @@ export default function HomePage() {
       setClaimSignature(signature);
       setClaimState('confirmed');
     } catch (err) {
-      if (typeof err === 'object' && err !== null) {
-        const msg = err.message || err.toString?.() || '';
-        if (err.code === 4001 || msg.includes('User rejected') || msg.includes('cancelada') || msg.includes('rechaz')) {
-          setClaimState('error');
-          setClaimError('Firma cancelada por el usuario.');
-          return;
-        }
-        if (msg.includes('Network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('Failed to fetch')) {
-          setClaimState('error');
-          setClaimError('Error de conexión con Solana Devnet. Intenta de nuevo.');
-          return;
-        }
-        if (msg.includes('simul') || msg.includes('simulation') || msg.includes('simulate')) {
-          setClaimState('error');
-          setClaimError(
-            'La transacción no pudo simularse en Solflare. ' +
-            'Asegúrate de que tu wallet tenga fondos en Devnet ' +
-            '(usa https://faucet.solana.com para obtener SOL de prueba).'
-          );
-          return;
-        }
-        if (msg.includes('blockhash') || msg.includes('expired')) {
-          setClaimState('error');
-          setClaimError('El bloque expiró. Vuelve a intentar reclamar el sello.');
-          return;
-        }
+      const msg = typeof err === 'object' && err !== null
+        ? (err.message || err.toString?.() || '')
+        : String(err);
+      if (err?.code === 4001 || msg.includes('User rejected') || msg.includes('cancelada') || msg.includes('rechaz')) {
+        setClaimState('error');
+        setClaimError('Firma cancelada por el usuario.');
+      } else if (msg.includes('seguridad') || msg.includes('security') || msg.includes('verificar')) {
+        setClaimState('error');
+        setClaimError(
+          'Solflare no pudo verificar la transacción. ' +
+          'Asegúrate de tener conexión a Internet e intenta de nuevo. ' +
+          'Si el problema persiste, usa una wallet diferente como Phantom.'
+        );
+      } else if (msg.includes('Network') || msg.includes('fetch') || msg.includes('timeout') || msg.includes('Failed to fetch')) {
+        setClaimState('error');
+        setClaimError('Error de conexión con Solana Devnet. Intenta de nuevo.');
+      } else if (msg.includes('blockhash') || msg.includes('expired')) {
+        setClaimState('error');
+        setClaimError('El bloque expiró. Vuelve a intentar reclamar el sello.');
+      } else if (msg.includes('simul') || msg.includes('simulation') || msg.includes('simulate')) {
+        setClaimState('error');
+        setClaimError(
+          'La transacción no pudo simularse. ' +
+          'Asegúrate de que tu wallet tenga fondos en Devnet ' +
+          '(usa https://faucet.solana.com para obtener SOL de prueba).'
+        );
+      } else {
+        setClaimState('error');
+        setClaimError(msg || 'No se pudo completar la transacción en Devnet. Reintenta.');
       }
-      setClaimState('error');
-      setClaimError('No se pudo completar la transacción en Devnet. Reintenta.');
     }
   }, [wallet, quiz.quizId, passport]);
 
